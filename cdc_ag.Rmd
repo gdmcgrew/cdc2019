@@ -1,0 +1,165 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r message=FALSE, warning=FALSE}
+library(mosaic)
+library(readr)
+library(tidyverse)
+library(ggplot2)
+
+FeedGrains <- read_csv("C:/Users/gdmcgrew/Downloads/FeedGrains.csv")
+Projection2019 <- read_csv("C:/Users/gdmcgrew/Downloads/Projection2019.csv")
+```
+
+```{r}
+head(FeedGrains)
+head(Projection2019)
+```
+```{r}
+barley=subset(FeedGrains, SC_GroupCommod_ID=="9" & SC_Frequency_Desc=="Annual" & SC_Geography_ID=="1")
+barley_supply=subset(barley, SC_Group_Desc=="Supply and use")
+barley_harvest=subset(barley_supply, SC_Attribute_ID=="3" & Year_ID >1925)
+barley_planted=subset(barley_supply, SC_Attribute_ID=="1")
+barley_harv=subset(barley_supply, SC_Attribute_ID=="2" & Year_ID > 1925)
+
+barley_harvest$total= (barley_harv$Amount)*(barley_harvest$Amount)
+#changed planted to harv
+
+barley_harvest$per= ((barley_harv$Amount)/(barley_planted$Amount))
+
+#View(barley_harv)
+#View(barley_planted)
+#View(barley_harvest)
+
+barley_harvest$harv=barley_harv$Amount
+barley_harvest$plant=barley_planted$Amount
+
+#write.csv(Malibu, file="Malibu.csv", row.names=FALSE)
+write.csv(barley_harvest, file="barley.csv", row.names=FALSE)
+```
+
+```{r}
+oats=subset(FeedGrains, SC_GroupCommod_ID=="17" & SC_Frequency_Desc=="Annual" & SC_Geography_ID=="1")
+oats_supply=subset(oats, SC_Group_Desc=="Supply and use")
+oats_harvest=subset(oats_supply, SC_Attribute_ID=="3" & Year_ID > 1925)
+oats_planted=subset(oats_supply, SC_Attribute_ID=="1")
+oats_harv=subset(oats_supply, SC_Attribute_ID=="2" & Year_ID > 1925)
+
+oats_harvest$total= (oats_harv$Amount)*(oats_harvest$Amount)
+
+oats_harvest$per= ((oats_harv$Amount)/(oats_planted$Amount))
+#View(oats_harvest)
+
+oats_harvest$harv=oats_harv$Amount
+oats_harvest$plant=oats_planted$Amount
+
+write.csv(oats_harvest, file="oats.csv", row.names=FALSE)
+```
+
+```{r}
+corn=subset(FeedGrains, SC_GroupCommod_ID=="12" & SC_Frequency_Desc=="Annual" & SC_Geography_ID=="1")
+corn_supply=subset(corn, SC_Group_Desc=="Supply and use")
+corn_harvest=subset(corn_supply, SC_Attribute_ID=="3" & Year_ID > 1925)
+corn_planted=subset(corn_supply, SC_Attribute_ID=="1")
+corn_harv=subset(corn_supply, SC_Attribute_ID=="2" & Year_ID > 1925)
+
+corn_harvest$total= (corn_harv$Amount)*(corn_harvest$Amount)
+
+corn_harvest$per= ((corn_harv$Amount)/(corn_planted$Amount))
+#View(corn_harvest)
+
+corn_harvest$harv=corn_harv$Amount
+corn_harvest$plant=corn_planted$Amount
+
+write.csv(corn_harvest, file="corn.csv", row.names=FALSE)
+```
+
+```{r}
+sorghum=subset(FeedGrains, SC_GroupCommod_ID=="20" & SC_Frequency_Desc=="Annual" & SC_Geography_ID=="1")
+sorghum_supply=subset(sorghum, SC_Group_Desc=="Supply and use")
+sorghum_harvest=subset(sorghum_supply, SC_Attribute_ID=="3")
+sorghum_planted=subset(sorghum_supply, SC_Attribute_ID=="1")
+sorghum_harv=subset(sorghum_supply, SC_Attribute_ID=="2")
+
+sorghum_harvest$total= (sorghum_harv$Amount)*(sorghum_harvest$Amount)
+
+sorghum_harvest$per= ((sorghum_harv$Amount)/(sorghum_planted$Amount))
+#View(sorghum_harvest)
+
+sorghum_harvest$harv=sorghum_harv$Amount
+sorghum_harvest$plant=sorghum_planted$Amount
+
+write.csv(sorghum_harvest, file="sorghum.csv", row.names=FALSE)
+```
+
+```{r}
+View(barley_harvest)
+View(oats_harvest)
+View(corn_harvest)
+View(sorghum_harvest)
+```
+
+```{r}
+plot(total~Year_ID, data=barley_harvest)
+plot(total~Year_ID, data=oats_harvest)
+plot(total~Year_ID, data=corn_harvest)
+plot(total~Year_ID, data=sorghum_harvest)
+```
+
+```{r}
+plot(Amount~Year_ID, data=barley_planted)
+plot(Amount~Year_ID, data=oats_planted)
+plot(Amount~Year_ID, data=corn_planted)
+plot(Amount~Year_ID, data=sorghum_planted)
+```
+
+```{r}
+plot(per~Year_ID, data=barley_harvest)
+plot(per~Year_ID, data=oats_harvest)
+plot(per~Year_ID, data=corn_harvest)
+plot(per~Year_ID, data=sorghum_harvest)
+```
+
+```{r warning=FALSE, message=FALSE}
+temp <- read_csv("C:/Users/gdmcgrew/Downloads/temp.csv")
+View(temp)
+#plot(Average Temperature~Contiguous US, data=temp)
+temp1=temp[c(5:127),]
+#temp1$Temp=temp1$`Average Temperature`
+View(temp1)
+
+```
+
+```{r}
+plot(`Average Temperature`~`Contiguous U.S.`, data=temp1)
+```
+
+```{r warning=FALSE, message=FALSE}
+Projection2019 <- read_csv("C:/Users/gdmcgrew/Downloads/Projection2019.csv")
+```
+
+```{r}
+barley_limit=subset(barley_harvest, Year_ID > 1979)
+barley_mod=lm(total~Year_ID, data=barley_limit)
+plot(total~Year_ID, data=barley_limit)
+abline(barley_mod)
+```
+
+```{r}
+barleyp=subset(Projection2019, Commodity=="Barley")
+barleyp_hpa=subset(barleyp, Attribute=="Yield/harvested acre")
+barleyp_ha=subset(barleyp, Attribute=="Harvested acres")
+#View(barleyp_hpa)
+#View(barleyp_ha)
+barleyp_hpa$total= (barleyp_hpa$Value)*(barleyp_ha$Value)
+barleyp_hpa$year= c(2017.5,2018.5,2019.5,2020.5,2021.5,2022.5,2023.5,2024.5,2025.5,2026.5,2027.5,2028.5)
+View(barleyp_hpa)
+View(barley_harvest)
+```
+
+```{r}
+plot(total~year, data=barleyp_hpa, xlim=c(2010,2030), ylim=c(100,300))
+abline(barley_mod)
+```
